@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-coastal-50 text-coastal-900 antialiased selection:bg-coastal-900 selection:text-white;
+  }
+}
