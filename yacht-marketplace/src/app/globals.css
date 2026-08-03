@@ -1,9 +1,32 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  /* Palette Coastal Elegance */
+  --color-coastal-50: #f6f7f9;
+  --color-coastal-100: #eceef2;
+  --color-coastal-200: #d5d9e3;
+  --color-coastal-300: #b1b9c9;
+  --color-coastal-400: #8693a9;
+  --color-coastal-500: #65748e;
+  --color-coastal-600: #505c75;
+  --color-coastal-700: #414b60;
+  --color-coastal-800: #384152;
+  --color-coastal-900: #0f172a;
+
+  /* Colori Accento */
+  --color-gold: #d4af37;
+  --color-gold-light: #f3e5ab;
+
+  /* Tipografia */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
 
 @layer base {
   body {
-    @apply bg-coastal-50 text-coastal-900 antialiased selection:bg-coastal-900 selection:text-white;
+    @apply bg-coastal-50 text-coastal-900 antialiased;
+  }
+
+  ::selection {
+    @apply bg-coastal-900 text-white;
   }
 }
