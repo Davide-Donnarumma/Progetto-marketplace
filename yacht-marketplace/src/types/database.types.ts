@@ -130,5 +130,41 @@ export interface Database {
         };
       };
     };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      search_available_yachts: {
+        Args: {
+          p_start_date?: string;
+          p_end_date?: string;
+          p_min_length?: number;
+          p_min_guests?: number;
+          p_min_luxury_tier?: number;
+          p_min_price?: number;
+          p_max_price?: number;
+        };
+        Returns: {
+          id: string;
+          host_id: string;
+          name: string;
+          description: string;
+          length_meters: number;
+          passenger_capacity: number;
+          luxury_tier: number;
+          price_per_day: number;
+          port_location: string;
+          images_urls: string[];
+          status: "DRAFT" | "PENDING_REVIEW" | "APPROVED" | "REJECTED";
+          created_at: string;
+          updated_at: string;
+        }[];
+      };
+    };
+    Enums: {
+      booking_status: "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED";
+      user_role: "GUEST" | "HOST" | "ADMIN";
+      yacht_status: "DRAFT" | "PENDING_REVIEW" | "APPROVED" | "REJECTED";
+    };
   };
 }
