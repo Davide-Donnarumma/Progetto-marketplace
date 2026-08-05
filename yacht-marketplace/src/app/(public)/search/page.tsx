@@ -137,12 +137,12 @@ function SearchContent() {
               {results.map((yacht) => (
                 <div key={yacht.id} className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 border border-coastal-100 group cursor-pointer">
                   <div className="relative h-56 bg-coastal-200 overflow-hidden">
-                    {/* Placeholder in assenza di immagini caricate */}
+                    {/* Immagine dell'imbarcazione allineata al database */}
                     <div 
                       className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
                       style={{ 
-                        backgroundImage: yacht.images_urls && yacht.images_urls.length > 0 
-                          ? `url('${yacht.images_urls[0]}')` 
+                        backgroundImage: yacht.image_url
+                          ? `url('${yacht.image_url}')` 
                           : "url('https://images.unsplash.com/photo-1605281317010-fe5ffe798166?q=80&w=1000')" 
                       }}
                     />

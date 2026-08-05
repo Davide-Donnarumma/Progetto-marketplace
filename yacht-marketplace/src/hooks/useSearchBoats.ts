@@ -18,7 +18,7 @@ export function useSearchBoats() {
 
   const supabase = useMemo(() => createClient(), []);
 
-  // Idratazione Iniziale
+  // Idratazione Iniziale dallo URL
   useEffect(() => {
     const params = new URLSearchParams(searchParams.toString());
     setFilters({
@@ -33,12 +33,13 @@ export function useSearchBoats() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Debouncing e Chiamata RPC
+  // Debouncing e Chiamata al Database tramite Query Dinamica
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
       setIsLoading(true);
       setError(null);
 
+      // 1. Aggiornamento dell'URL per la condivisibilità
       const params = new URLSearchParams();
       if (filters.startDate) params.set("startDate", filters.startDate);
       if (filters.endDate) params.set("endDate", filters.endDate);
@@ -55,24 +56,40 @@ export function useSearchBoats() {
 
       router.replace(`${pathname}?${params.toString()}`, { scroll: false });
 
+      // 2. Costruzione ed Esecuzione della Query Supabase
       try {
-        const { data, error: supabaseError } = await supabase.rpc(
-          "search_available_yachts",
-          {
-            p_start_date: filters.startDate || undefined,
-            p_end_date: filters.endDate || undefined,
-            p_min_length: filters.minLength,
-            p_min_guests: filters.minGuests,
-            p_min_luxury_tier: filters.minLuxuryTier,
-            p_min_price: filters.minPrice,
-            p_max_price: filters.maxPrice,
-          },
-        );
+        let query = supabase.from("yachts").select("*");
+
+        // Applichiamo i filtri solo se l'utente li ha modificati
+        if (filters.minLength > 0) {
+          query = query.gte("length_meters", filters.minLength);
+        }
+        if (filters.minGuests > 1) {
+          query = query.gte("passenger_capacity", filters.minGuests);
+        }
+        if (filters.minLuxuryTier > 1) {
+          query = query.gte("luxury_tier", filters.minLuxuryTier);
+        }
+        if (filters.minPrice > 0) {
+          query = query.gte("price_per_day", filters.minPrice);
+        }
+        if (filters.maxPrice < 999999) {
+          query = query.lte("price_per_day", filters.maxPrice);
+        }
+
+        /* 
+          Nota sulle date: Il filtraggio per data (startDate, endDate) 
+          richiederà in futuro l'interrogazione di una tabella "bookings" 
+          per verificare le sovrapposizioni. Al momento, applichiamo i 
+          filtri strutturali e commerciali.
+        */
+
+        const { data, error: supabaseError } = await query;
 
         if (supabaseError) throw supabaseError;
         setResults(data || []);
       } catch (err) {
-        console.error("Errore critico durante il fetching della RPC:", err);
+        console.error("Errore critico durante il fetching della flotta:", err);
         setError(
           "Si è verificato un errore durante la ricerca delle imbarcazioni. La preghiamo di riprovare.",
         );

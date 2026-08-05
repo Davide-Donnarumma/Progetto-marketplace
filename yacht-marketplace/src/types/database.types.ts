@@ -53,6 +53,7 @@ export interface Database {
           price_per_day: number;
           port_location: string;
           images_urls: string[];
+          image_url: string | null;
           status: "DRAFT" | "PENDING_REVIEW" | "APPROVED" | "REJECTED";
           created_at: string;
           updated_at: string;
@@ -68,6 +69,7 @@ export interface Database {
           price_per_day: number;
           port_location: string;
           images_urls?: string[];
+          image_url: string | null;
           status?: "DRAFT" | "PENDING_REVIEW" | "APPROVED" | "REJECTED";
           created_at?: string;
           updated_at?: string;
@@ -83,6 +85,7 @@ export interface Database {
           price_per_day?: number;
           port_location?: string;
           images_urls?: string[];
+          image_url: string | null;
           status?: "DRAFT" | "PENDING_REVIEW" | "APPROVED" | "REJECTED";
           created_at?: string;
           updated_at?: string;
@@ -155,6 +158,7 @@ export interface Database {
           price_per_day: number;
           port_location: string;
           images_urls: string[];
+          image_url: string | null;
           status: "DRAFT" | "PENDING_REVIEW" | "APPROVED" | "REJECTED";
           created_at: string;
           updated_at: string;
