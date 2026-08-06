@@ -1,72 +1,61 @@
 import { NextResponse } from "next/server";
-import { stripe } from "@/lib/stripe";
+import Stripe from "stripe";
 import { createClient } from "@/lib/supabase/server";
 
-export async function POST(request: Request) {
-  try {
-    // 1. Estrazione dei dati inviati dal browser
-    const body = await request.json();
-    const { yachtId, days } = body;
+// Inizializzazione sicura di Stripe lato server
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2026-07-29.dahlia",
+});
 
-    if (!yachtId || !days || days < 1) {
+export async function POST(req: Request) {
+  try {
+    const { bookingId } = await req.json();
+
+    if (!bookingId) {
       return NextResponse.json(
-        { error: "Dati mancanti o non validi" },
+        { error: "Identificativo prenotazione mancante" },
         { status: 400 },
       );
     }
 
-    // 2. Verifica dell'autenticazione tramite Supabase (Protezione Rotta)
     const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
 
-    if (!user) {
-      return NextResponse.json(
-        { error: "Non autorizzato. Effettui l'accesso." },
-        { status: 401 },
-      );
-    }
-
-    // 3. Recupero SICURO del prezzo dal database (Prevenzione frodi)
-    const { data: yacht, error: dbError } = await supabase
-      .from("yachts")
-      .select("price_per_day, name")
-      .eq("id", yachtId)
+    // Interroghiamo la tabella bookings per estrarre l'importo totale
+    const { data: booking, error: bookingError } = await supabase
+      .from("bookings")
+      .select("*")
+      .eq("id", bookingId)
       .single();
 
-    if (dbError || !yacht) {
+    if (bookingError || !booking) {
       return NextResponse.json(
-        { error: "Imbarcazione non trovata" },
+        { error: "Prenotazione non trovata nel sistema" },
         { status: 404 },
       );
     }
 
-    // 4. Calcolo dell'importo totale in centesimi (formato matematico richiesto da Stripe)
-    const amountInCents = Math.round(yacht.price_per_day * days * 100);
+    // Stripe richiede che gli importi siano calcolati nell'unità base della valuta (centesimi per l'Euro)
+    const amountInCents = Math.round(booking.total_price * 100);
 
-    // 5. Creazione del Payment Intent su Stripe
+    // Creazione del Payment Intent con i metadati per la riconciliazione contabile
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amountInCents,
       currency: "eur",
-      // Abilita i metodi di pagamento automatici (Carte, Apple Pay, Google Pay)
       automatic_payment_methods: {
         enabled: true,
       },
-      // I metadati ci serviranno per identificare la transazione nel Webhook finale
       metadata: {
-        yachtId: yachtId,
-        userId: user.id,
-        days: days.toString(),
+        booking_id: booking.id,
+        yacht_id: booking.yacht_id,
+        guest_id: booking.guest_id,
       },
     });
 
-    // 6. Restituzione della chiave temporanea (client_secret) al frontend
     return NextResponse.json({ clientSecret: paymentIntent.client_secret });
-  } catch (error) {
-    console.error("Errore critico in fase di generazione pagamento:", error);
+  } catch (error: unknown) {
+    console.error("Stripe Checkout Error:", error);
     return NextResponse.json(
-      { error: "Si è verificato un errore interno durante l'elaborazione" },
+      { error: "Errore di connessione con il provider di pagamento" },
       { status: 500 },
     );
   }

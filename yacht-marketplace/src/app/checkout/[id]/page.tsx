@@ -6,7 +6,7 @@ import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-
 import { Anchor, Lock, Loader2, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 
-// 1. Inizializzazione esterna di Stripe (evita re-render inutili del componente)
+// Inizializzazione esterna di Stripe
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 // ============================================================================
@@ -21,23 +21,18 @@ function CheckoutForm() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     
-    // Sicurezza: blocca l'invio se gli SDK non sono ancora caricati
     if (!stripe || !elements) return;
 
     setIsProcessing(true);
     setErrorMessage(null);
 
-    // 2. Conferma del pagamento crittografata tramite l'iframe di Stripe
     const { error } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        // Reindirizzamento tassativo imposto da Stripe dopo un pagamento andato a buon fine
         return_url: `${window.location.origin}/checkout/success`,
       },
     });
 
-    // Se il codice raggiunge questa riga, c'è stato un errore immediato
-    // (es. fondi insufficienti, carta scaduta, 3D Secure fallito)
     if (error) {
       setErrorMessage(error.message ?? "La transazione non è andata a buon fine.");
     }
@@ -47,7 +42,6 @@ function CheckoutForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Stripe Payment Element inietta l'UI della carta di credito */}
       <PaymentElement />
       
       {errorMessage && (
@@ -77,25 +71,20 @@ function CheckoutForm() {
 // PAGINA PRINCIPALE DI CHECKOUT
 // ============================================================================
 export default function CheckoutPage({ params }: { params: Promise<{ id: string }> }) {
-  // Scompattamento asincrono dell'ID richiesto da Next.js 16+
   const resolvedParams = use(params);
-  const yachtId = resolvedParams.id;
+  // Modifica Cruciale: L'ID nella barra degli indirizzi ora è quello della prenotazione
+  const bookingId = resolvedParams.id;
 
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  
-  // NOTA ARCHITETTURALE: Per questo test, fissiamo la prenotazione a 1 giorno.
-  // In una fase successiva, questo valore deriverà da un calendario di selezione date.
-  const days = 1; 
 
   useEffect(() => {
-    // 3. Richiesta silente al nostro server per generare il Payment Intent
     const initializePayment = async () => {
       try {
         const response = await fetch("/api/create-payment-intent", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ yachtId, days }),
+          body: JSON.stringify({ bookingId }), // Inviamo l'ID della prenotazione al server
         });
         
         const data = await response.json();
@@ -111,14 +100,14 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
     };
 
     initializePayment();
-  }, [yachtId, days]);
+  }, [bookingId]);
 
   return (
     <div className="min-h-screen bg-coastal-50 pt-24 pb-12 px-6">
       <div className="max-w-xl mx-auto">
         
         <div className="text-center mb-10">
-          <Link href={`/yacht/${yachtId}`} className="inline-block mb-4">
+          <Link href="/trips" className="inline-block mb-4">
             <Anchor className="w-10 h-10 text-gold mx-auto stroke-[1.5]" />
           </Link>
           <h1 className="text-3xl font-light text-coastal-900 tracking-tight">Checkout Sicuro</h1>
@@ -143,7 +132,6 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
               {error}
             </div>
           ) : clientSecret ? (
-            // L'elemento Elements avvolge il form e gli inietta la connessione segreta
             <Elements 
               stripe={stripePromise} 
               options={{ 
@@ -151,7 +139,7 @@ export default function CheckoutPage({ params }: { params: Promise<{ id: string 
                 appearance: {
                   theme: 'stripe',
                   variables: {
-                    colorPrimary: '#D4AF37', // Oro Coastal Elegance
+                    colorPrimary: '#D4AF37', 
                     colorBackground: '#ffffff',
                     colorText: '#0f172a',
                     colorDanger: '#ef4444',

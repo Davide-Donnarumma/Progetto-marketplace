@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
+import Link from "next/link";
 import { useSearchBoats } from "@/hooks/useSearchBoats";
 import { useSearchStore } from "@/store/useSearchStore";
 import { SlidersHorizontal, Users, Ruler, Star, Anchor } from "lucide-react";
@@ -135,7 +136,11 @@ function SearchContent() {
             /* Card Imbarcazioni */
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {results.map((yacht) => (
-                <div key={yacht.id} className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 border border-coastal-100 group cursor-pointer">
+                <Link 
+                  href={`/yacht/${yacht.id}`} 
+                  key={yacht.id} 
+                  className="block bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 border border-coastal-100 group cursor-pointer"
+                >
                   <div className="relative h-56 bg-coastal-200 overflow-hidden">
                     {/* Immagine dell'imbarcazione allineata al database */}
                     <div 
@@ -168,7 +173,7 @@ function SearchContent() {
                       </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}
@@ -179,7 +184,7 @@ function SearchContent() {
 }
 
 // ============================================================================
-// WRAPPER DI PAGINA CON SUSPENSE (Prevenzione errori Build Next.js)
+// WRAPPER DI PAGINA CON SUSPENSE
 // ============================================================================
 export default function SearchPage() {
   return (
