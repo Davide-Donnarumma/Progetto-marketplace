@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import Navbar from "@/components/Navbar";
 
 // Ottimizzazione del font: caricato a livello server e mappato sulla variabile CSS
 const inter = Inter({
@@ -22,11 +23,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="it" className={`${inter.variable}`}>
-      {/* 
-        Le classi Tailwind globali (bg-coastal-50, text-coastal-900) 
-        sono già applicate dal file globals.css tramite @layer base 
-      */}
-      <body>{children}</body>
+      <body>
+        {/* La barra di navigazione globale, visibile su tutte le rotte */}
+        <Navbar />
+        
+        {/* Il contenuto dinamico delle singole pagine */}
+        {children}
+      </body>
     </html>
   );
 }
