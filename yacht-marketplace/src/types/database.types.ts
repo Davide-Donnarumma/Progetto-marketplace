@@ -17,6 +17,7 @@ export interface Database {
           last_name: string;
           stripe_account_id: string | null;
           stripe_customer_id: string | null;
+          account_status: string; // Nuova colonna aggiunta
           created_at: string;
           updated_at: string;
         };
@@ -27,6 +28,7 @@ export interface Database {
           last_name: string;
           stripe_account_id?: string | null;
           stripe_customer_id?: string | null;
+          account_status?: string; // Nuova colonna aggiunta
           created_at?: string;
           updated_at?: string;
         };
@@ -37,6 +39,7 @@ export interface Database {
           last_name?: string;
           stripe_account_id?: string | null;
           stripe_customer_id?: string | null;
+          account_status?: string; // Nuova colonna aggiunta
           created_at?: string;
           updated_at?: string;
         };
@@ -54,6 +57,7 @@ export interface Database {
           port_location: string;
           images_urls: string[];
           image_url: string | null;
+          is_flagged: boolean; // Nuova colonna aggiunta
           status: "DRAFT" | "PENDING_REVIEW" | "APPROVED" | "REJECTED";
           created_at: string;
           updated_at: string;
@@ -70,6 +74,7 @@ export interface Database {
           port_location: string;
           images_urls?: string[];
           image_url: string | null;
+          is_flagged?: boolean; // Nuova colonna aggiunta
           status?: "DRAFT" | "PENDING_REVIEW" | "APPROVED" | "REJECTED";
           created_at?: string;
           updated_at?: string;
@@ -86,6 +91,7 @@ export interface Database {
           port_location?: string;
           images_urls?: string[];
           image_url: string | null;
+          is_flagged?: boolean; // Nuova colonna aggiunta
           status?: "DRAFT" | "PENDING_REVIEW" | "APPROVED" | "REJECTED";
           created_at?: string;
           updated_at?: string;
